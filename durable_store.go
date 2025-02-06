@@ -14,17 +14,19 @@ import (
 // DynamoDurableStore implements the DurableStore interface
 // and helps persist states in a DynamoDB
 type DynamoDurableStore struct {
-	ddb        database
-	writerChan chan *egopb.DurableState
+	ddb           database
+	writerChan    chan *egopb.DurableState
+	flushInterval time.Duration
 }
 
 // enforce interface implementation
 var _ persistence.StateStore = (*DynamoDurableStore)(nil)
 
-func NewDurableStore(tableName string, client *dynamodb.Client) *DynamoDurableStore {
+func NewDurableStore(tableName string, client *dynamodb.Client, flushInterval time.Duration) *DynamoDurableStore {
 	s := &DynamoDurableStore{
-		ddb:        newDynamodb(tableName, client),
-		writerChan: make(chan *egopb.DurableState, 100),
+		ddb:           newDynamodb(tableName, client),
+		writerChan:    make(chan *egopb.DurableState, 100),
+		flushInterval: flushInterval,
 	}
 
 	// Run ticker loop that flushes the writes to the database
@@ -37,7 +39,7 @@ func (s *DynamoDurableStore) flushWrites() {
 	ctx := context.Background()
 
 	for {
-		time.Sleep(5 * time.Second)
+		time.Sleep(s.flushInterval)
 		fmt.Println("Consuming messages...")
 		allStates := make(map[string]*egopb.DurableState)
 

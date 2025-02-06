@@ -69,7 +69,7 @@ func main() {
 		},
 		BillingMode: types.BillingModePayPerRequest,
 	})
-	durableStore := dynamodb.NewDurableStore("MyTable", ddb)
+	durableStore := dynamodb.NewDurableStore("MyTable", ddb, 5 * time.Second)
 	// connect the event store
 	_ = durableStore.Connect(ctx)
 	// create the ego engine

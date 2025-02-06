@@ -97,7 +97,7 @@ func (c TestContainer) GetDurableStore() *DynamoDurableStore {
 	client := c.GetDdbClient(ctx)
 
 	tableName := "states_store"
-	store := NewDurableStore(tableName, client)
+	store := NewDurableStore(tableName, client, 5 * time.Second)
 	c.CreateTable(ctx, tableName, client)
 	return store
 }
