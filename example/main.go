@@ -27,7 +27,7 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
+
 	"log"
 	"os"
 	"os/signal"
@@ -105,28 +105,25 @@ func main() {
 	account = reply.(*samplepb.Account)
 	log.Printf("current balance after a credit of 250: %v", account.GetAccountBalance())
 
-	time.Sleep(2 * time.Second)
+	// time.Sleep(2 * time.Second)
 	reply, _, _ = engine.SendCommand(ctx, entityID, command, time.Minute)
 	account = reply.(*samplepb.Account)
 	log.Printf("current balance after a credit of 250: %v", account.GetAccountBalance())
-	time.Sleep(10 * time.Second)
+	time.Sleep(7 * time.Second)
 
 	reply, _, _ = engine.SendCommand(ctx, entityID, command, time.Minute)
 	account = reply.(*samplepb.Account)
 	log.Printf("current balance after a credit of 250: %v", account.GetAccountBalance())
-
 
 	// capture ctrl+c
 	interruptSignal := make(chan os.Signal, 1)
 	signal.Notify(interruptSignal, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-interruptSignal
 
-	// Persist all data when shutting down
-	durableStore.Shutdown()
-	// disconnect the event store
-	_ = durableStore.Disconnect(ctx)
 	// stop the actor system
 	_ = engine.Stop(ctx)
+	// disconnect the event store
+	_ = durableStore.Disconnect(ctx)
 	os.Exit(0)
 }
 
